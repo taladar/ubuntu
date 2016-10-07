@@ -17,6 +17,11 @@ apt-get install -y $packages
 export DEBIAN_FRONTEND=noninteractive
 debootstrap --variant=minbase --arch=$arch $suite $chroot_dir $apt_mirror
 
+### install ubuntu-minimal
+cp /etc/resolv.conf $chroot_dir/etc/resolv.conf
+mount -o bind /proc $chroot_dir/proc
+mount -o bind /sys  $chroot_dir/sys
+
 ### update the list of package sources
 cat <<EOF > $chroot_dir/etc/apt/sources.list
 deb $apt_mirror $suite main restricted universe multiverse
@@ -28,12 +33,9 @@ if [[ "${suite}" != "lucid" ]]; then
   cat <<EOF >> $chroot_dir/etc/apt/sources.list
 deb http://extras.ubuntu.com/ubuntu $suite main
 EOF
+chroot $chroot_dir apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192
 fi
 
-### install ubuntu-minimal
-cp /etc/resolv.conf $chroot_dir/etc/resolv.conf
-mount -o bind /proc $chroot_dir/proc
-mount -o bind /sys  $chroot_dir/sys
 
 # stub for packages trying to communicate with upstart during installation/upgrade, e.g. procps
 chroot $chroot_dir dpkg-divert --local --rename --add /sbin/initctl
