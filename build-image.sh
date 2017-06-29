@@ -10,7 +10,7 @@ docker_image="32bit/ubuntu:${1:-14.04}"
 
 ### make sure that the required tools are installed
 packages="debootstrap dchroot"
-which docker || packages="$packages docker.io"
+which docker || packages="$packages docker-engine"
 apt-get install -y $packages
 
 ### install a minbase system with debootstrap
