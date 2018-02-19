@@ -8,10 +8,12 @@ chroot_dir="/var/chroot/$suite"
 apt_mirror='http://archive.ubuntu.com/ubuntu'
 docker_image="32bit/ubuntu:${1:-14.04}"
 
-### make sure that the required tools are installed
-packages="debootstrap dchroot"
-which docker || packages="$packages docker-engine"
-apt-get install -y $packages
+### make sure that the required tools are installed (on non-debian distros you have to take care of that yourself)
+if [[ -e "/etc/debian_version" ]]; then
+  packages="debootstrap dchroot"
+  which docker || packages="$packages docker-engine"
+  apt-get install -y $packages
+fi
 
 ### install a minbase system with debootstrap
 export DEBIAN_FRONTEND=noninteractive
@@ -29,10 +31,11 @@ deb $apt_mirror $suite-updates main restricted universe multiverse
 deb $apt_mirror $suite-backports main restricted universe multiverse
 deb http://security.ubuntu.com/ubuntu $suite-security main restricted universe multiverse
 EOF
-if [[ "${suite}" != "lucid" ]]; then
+if [[ "${suite}" != "lucid" && "${suite}" != "artful" && "${suite}" != "bionic" ]]; then
   cat <<EOF >> $chroot_dir/etc/apt/sources.list
 deb http://extras.ubuntu.com/ubuntu $suite main
 EOF
+chroot $chroot_dir apt-get install -y gnupg
 chroot $chroot_dir apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 16126D3A3E5C1192
 fi
 
