@@ -31,7 +31,7 @@ deb $apt_mirror $suite-updates main restricted universe multiverse
 deb $apt_mirror $suite-backports main restricted universe multiverse
 deb http://security.ubuntu.com/ubuntu $suite-security main restricted universe multiverse
 EOF
-if [[ "${suite}" != "lucid" && "${suite}" != "artful" && "${suite}" != "bionic" ]]; then
+if [[ "${suite}" != "bionic" ]]; then
   cat <<EOF >> $chroot_dir/etc/apt/sources.list
 deb http://extras.ubuntu.com/ubuntu $suite main
 EOF
@@ -42,16 +42,9 @@ fi
 
 # stub for packages trying to communicate with upstart during installation/upgrade, e.g. procps
 chroot $chroot_dir dpkg-divert --local --rename --add /sbin/initctl
-if [[ "${suite}" == "lucid" ]]; then
-  chroot $chroot_dir mv /sbin/initctl /sbin/initctl.distrib
-fi
 chroot $chroot_dir ln -s /bin/true /sbin/initctl
 
 chroot $chroot_dir apt-get update
-if [[ "${suite}" == "lucid" ]]; then
-  chroot $chroot_dir apt-get -y --force-yes install gpgv
-  chroot $chroot_dir apt-get update
-fi
 chroot $chroot_dir apt-get -y upgrade
 chroot $chroot_dir apt-get -y install ubuntu-minimal
 
